@@ -35,7 +35,7 @@ export default function TenderList({ refreshTrigger }) {
   }
 
   const handleDelete = async (e, id) => {
-    e.stopPropagation() // Prevent modal open
+    e.stopPropagation() 
     if (!window.confirm('Tem certeza que deseja excluir este edital?')) return
     
     try {
@@ -91,7 +91,6 @@ export default function TenderList({ refreshTrigger }) {
 
       if (error) throw error
 
-      // Update local state
       const updatedTender = { ...selectedTender, ...editForm }
       setTenders(tenders.map(t => t.id === updatedTender.id ? updatedTender : t))
       setSelectedTender(updatedTender)
@@ -108,7 +107,7 @@ export default function TenderList({ refreshTrigger }) {
     return (
       <div className="card loading-state">
         <div className="spinner"></div>
-        <p>Carregando editais...</p>
+        <p className="text-muted">Carregando painel de editais...</p>
       </div>
     )
   }
@@ -116,30 +115,30 @@ export default function TenderList({ refreshTrigger }) {
   if (tenders.length === 0) {
     return (
       <div className="card empty-state">
-        <FileText size={48} className="text-muted" />
-        <h3>Nenhum edital salvo</h3>
-        <p>Faça o upload de um PDF para começar a extrair dados.</p>
+        <FileText size={56} className="text-primary" style={{opacity: 0.5}} />
+        <h3>Nenhum edital na base</h3>
+        <p className="text-muted">Os editais processados aparecerão nesta área do painel.</p>
       </div>
     )
   }
 
   return (
-    <div className="tender-list-container">
-      <h2>Meus Editais Salvos</h2>
+    <section className="tender-list-container">
+      <h2>Painel de Editais</h2>
       <div className="tender-grid">
         {tenders.map((tender) => (
           <div key={tender.id} className="tender-card card" onClick={() => openModal(tender)}>
             <div className="tender-header">
               <span className="tender-number">
-                <FileText size={16} />
+                <FileText size={18} />
                 {tender.numero_edital || 'S/N'}
               </span>
               <button 
                 className="btn-icon btn-delete" 
                 onClick={(e) => handleDelete(e, tender.id)}
-                title="Excluir"
+                title="Excluir do sistema"
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
               </button>
             </div>
             
@@ -149,7 +148,7 @@ export default function TenderList({ refreshTrigger }) {
             
             <div className="tender-footer">
               <div className="tender-value">
-                <DollarSign size={16} />
+                <DollarSign size={16} className="text-primary" />
                 <span>R$ {tender.valor || '0,00'}</span>
               </div>
               <div className="tender-date text-muted">
@@ -166,35 +165,37 @@ export default function TenderList({ refreshTrigger }) {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Detalhes do Edital</h3>
-              <button className="btn-icon" onClick={closeModal} title="Fechar">
-                <X size={20} />
+              <h3>Inspeção de Edital</h3>
+              <button className="btn-icon" onClick={closeModal} title="Fechar Painel">
+                <X size={24} />
               </button>
             </div>
             
             <div className="modal-body">
               {isEditing ? (
                 <div className="edit-form">
-                  <div className="form-group">
-                    <label>Número do Edital</label>
-                    <input 
-                      type="text" 
-                      value={editForm.numero_edital} 
-                      onChange={e => setEditForm({...editForm, numero_edital: e.target.value})}
-                    />
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label>Nº do Edital</label>
+                      <input 
+                        type="text" 
+                        value={editForm.numero_edital} 
+                        onChange={e => setEditForm({...editForm, numero_edital: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Valor Estimado (R$)</label>
+                      <input 
+                        type="text" 
+                        value={editForm.valor} 
+                        onChange={e => setEditForm({...editForm, valor: e.target.value})}
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>Valor (R$)</label>
-                    <input 
-                      type="text" 
-                      value={editForm.valor} 
-                      onChange={e => setEditForm({...editForm, valor: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Objeto</label>
+                  <div className="form-group full-width" style={{marginTop: '16px'}}>
+                    <label>Objeto Integral</label>
                     <textarea 
-                      rows={6}
+                      rows={8}
                       value={editForm.objeto} 
                       onChange={e => setEditForm({...editForm, objeto: e.target.value})}
                     />
@@ -202,20 +203,24 @@ export default function TenderList({ refreshTrigger }) {
                 </div>
               ) : (
                 <div className="view-mode">
-                  <div className="detail-row">
-                    <strong>Número</strong>
-                    <p>{selectedTender.numero_edital || 'S/N'}</p>
+                  <div className="grid-2">
+                    <div className="detail-row">
+                      <strong>Nº do Edital</strong>
+                      <p>{selectedTender.numero_edital || 'S/N'}</p>
+                    </div>
+                    <div className="detail-row">
+                      <strong>Data de Inserção</strong>
+                      <p>{new Date(selectedTender.created_at).toLocaleString('pt-BR')}</p>
+                    </div>
                   </div>
-                  <div className="detail-row">
-                    <strong>Data de Extração</strong>
-                    <p>{new Date(selectedTender.created_at).toLocaleString('pt-BR')}</p>
-                  </div>
-                  <div className="detail-row">
+                  
+                  <div className="detail-row" style={{marginTop: '8px'}}>
                     <strong>Valor Estimado</strong>
-                    <p className="text-success">R$ {selectedTender.valor || '0,00'}</p>
+                    <p className="text-success" style={{fontSize: '18px'}}>R$ {selectedTender.valor || '0,00'}</p>
                   </div>
-                  <div className="detail-row">
-                    <strong>Objeto Completo</strong>
+                  
+                  <div className="detail-row" style={{marginTop: '24px'}}>
+                    <strong>Objeto da Licitação</strong>
                     <p className="object-text">{selectedTender.objeto || 'Não identificado'}</p>
                   </div>
                 </div>
@@ -229,21 +234,21 @@ export default function TenderList({ refreshTrigger }) {
                     Cancelar
                   </button>
                   <button className="btn-primary" onClick={handleSaveEdit} disabled={saving} style={{ width: 'auto' }}>
-                    <Save size={16} style={{marginRight: '8px'}} />
-                    {saving ? 'Salvando...' : 'Salvar'}
+                    <Save size={18} style={{marginRight: '8px'}} />
+                    {saving ? 'Aplicando...' : 'Salvar Alterações'}
                   </button>
                 </>
               ) : (
                 <>
                   <button className="btn-text" onClick={() => setIsEditing(true)}>
-                    <Edit size={16} style={{marginRight: '8px', verticalAlign: 'middle'}} />
-                    Editar Dados
+                    <Edit size={18} style={{marginRight: '8px', verticalAlign: 'middle'}} />
+                    Modificar
                   </button>
                   <button className="btn-primary" onClick={handleCopy} style={{ width: 'auto' }}>
                     {copied ? (
-                      <><Check size={16} style={{marginRight: '8px'}} /> Copiado!</>
+                      <><Check size={18} style={{marginRight: '8px'}} /> Copiado!</>
                     ) : (
-                      <><Copy size={16} style={{marginRight: '8px'}} /> Copiar Dados</>
+                      <><Copy size={18} style={{marginRight: '8px'}} /> Extrair Dados</>
                     )}
                   </button>
                 </>
@@ -252,6 +257,6 @@ export default function TenderList({ refreshTrigger }) {
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }

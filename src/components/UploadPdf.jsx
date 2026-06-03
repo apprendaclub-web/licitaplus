@@ -25,14 +25,12 @@ export default function UploadPdf({ user, onUploadSuccess }) {
     setLoading(true)
 
     try {
-      // 1. Extrair texto do PDF
       const text = await extractTextFromPdf(selectedFile)
-      // 2. Aplicar Regex
       const data = parseTenderData(text)
       setExtractedData(data)
     } catch (err) {
       console.error(err)
-      setError('Erro ao processar o PDF. Certifique-se de que é um documento de texto válido.')
+      setError('Erro ao processar o PDF. Certifique-se de que é um documento legível.')
     } finally {
       setLoading(false)
     }
@@ -57,16 +55,14 @@ export default function UploadPdf({ user, onUploadSuccess }) {
 
       if (insertError) throw insertError
 
-      // Sucesso
       setFile(null)
       setExtractedData(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
       if (onUploadSuccess) onUploadSuccess()
       
-      alert('Edital salvo com sucesso!')
     } catch (err) {
       console.error(err)
-      setError(err.message || 'Erro ao salvar os dados.')
+      setError(err.message || 'Erro ao salvar os dados no banco.')
     } finally {
       setLoading(false)
     }
@@ -77,7 +73,7 @@ export default function UploadPdf({ user, onUploadSuccess }) {
   }
 
   return (
-    <div className="upload-section card">
+    <section className="upload-section card">
       <h2>Processar Novo Edital</h2>
       
       <div 
@@ -94,25 +90,25 @@ export default function UploadPdf({ user, onUploadSuccess }) {
         
         {!file && !loading && (
           <div className="upload-placeholder">
-            <UploadCloud size={48} className="text-muted" />
-            <p>Clique ou arraste um PDF aqui</p>
+            <UploadCloud size={56} className="text-primary" style={{ opacity: 0.8 }} />
+            <p>Arraste seu edital em PDF ou clique para selecionar</p>
           </div>
         )}
 
         {loading && !extractedData && (
           <div className="upload-processing">
             <div className="spinner"></div>
-            <p>Lendo e extraindo dados do PDF...</p>
+            <p className="text-muted">Analisando o documento com inteligência...</p>
           </div>
         )}
 
         {file && !loading && (
           <div className="file-info">
             <FileText size={32} className="text-primary" />
-            <span>{file.name}</span>
+            <span style={{ color: 'var(--primary-color)' }}>{file.name}</span>
             <button 
               type="button" 
-              className="btn-text btn-small"
+              className="btn-text"
               onClick={(e) => {
                 e.stopPropagation()
                 setFile(null)
@@ -120,14 +116,14 @@ export default function UploadPdf({ user, onUploadSuccess }) {
                 if (fileInputRef.current) fileInputRef.current.value = ''
               }}
             >
-              Remover
+              Trocar arquivo
             </button>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="alert error">
+        <div className="alert error fade-in">
           <AlertCircle size={20} />
           <span>{error}</span>
         </div>
@@ -137,48 +133,50 @@ export default function UploadPdf({ user, onUploadSuccess }) {
         <div className="extraction-results fade-in">
           <div className="alert success">
             <CheckCircle size={20} />
-            <span>Dados extraídos com sucesso! Revise antes de salvar.</span>
+            <span>Extração concluída com sucesso. Revise os dados extraídos abaixo.</span>
           </div>
           
           <form onSubmit={handleSave} className="extracted-form">
-            <div className="form-group">
-              <label>Número do Edital</label>
-              <input 
-                type="text" 
-                value={extractedData.numero_edital} 
-                onChange={(e) => handleDataChange('numero_edital', e.target.value)}
-                placeholder="Ex: 12/2023"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Valor Estimado</label>
-              <input 
-                type="text" 
-                value={extractedData.valor} 
-                onChange={(e) => handleDataChange('valor', e.target.value)}
-                placeholder="Ex: 150.000,00"
-              />
+            <div className="grid-2">
+              <div className="form-group">
+                <label>Nº do Edital</label>
+                <input 
+                  type="text" 
+                  value={extractedData.numero_edital} 
+                  onChange={(e) => handleDataChange('numero_edital', e.target.value)}
+                  placeholder="Ex: 12/2023"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Valor Estimado</label>
+                <input 
+                  type="text" 
+                  value={extractedData.valor} 
+                  onChange={(e) => handleDataChange('valor', e.target.value)}
+                  placeholder="Ex: 150.000,00"
+                />
+              </div>
             </div>
 
             <div className="form-group full-width">
-              <label>Objeto</label>
+              <label>Objeto da Licitação</label>
               <textarea 
                 value={extractedData.objeto} 
                 onChange={(e) => handleDataChange('objeto', e.target.value)}
-                rows={4}
-                placeholder="Descrição do objeto da licitação"
+                rows={5}
+                placeholder="Descrição extraída do objeto..."
               />
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? 'Salvando...' : 'Salvar no Banco de Dados'}
+              <button type="submit" className="btn-primary" disabled={loading} style={{ width: 'auto', minWidth: '200px' }}>
+                {loading ? 'Salvando...' : 'Salvar no Sistema'}
               </button>
             </div>
           </form>
         </div>
       )}
-    </div>
+    </section>
   )
 }

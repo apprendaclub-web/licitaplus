@@ -3,12 +3,15 @@ import { supabase } from './supabaseClient'
 import Auth from './components/Auth'
 import UploadPdf from './components/UploadPdf'
 import TenderList from './components/TenderList'
-import { LogOut, LayoutDashboard } from 'lucide-react'
+import { LogOut, Diamond } from 'lucide-react'
 import './index.css'
 
 function App() {
   const [session, setSession] = useState(null)
   const [refreshList, setRefreshList] = useState(0)
+  const [activeTab, setActiveTab] = useState('Dashboard')
+
+  const tabs = ['Dashboard', 'Declarações', 'Propostas', 'Gestão']
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -25,7 +28,6 @@ function App() {
   }
 
   const handleUploadSuccess = () => {
-    // Incrementa para forçar re-render na lista
     setRefreshList(prev => prev + 1)
   }
 
@@ -34,26 +36,50 @@ function App() {
       {!session ? (
         <Auth />
       ) : (
-        <div className="dashboard">
+        <>
           <header className="dashboard-header">
-            <div className="logo">
-              <LayoutDashboard className="text-primary" />
-              <h1>LicitaPlus</h1>
+            <div className="header-top">
+              <div className="logo">
+                <Diamond className="text-primary" size={28} />
+                <h1>LicitaPlus</h1>
+              </div>
+              
+              <div className="user-menu">
+                <span className="user-email">{session.user.email}</span>
+                <button onClick={handleLogout} className="btn-icon" title="Sair do sistema">
+                  <LogOut size={20} />
+                </button>
+              </div>
             </div>
             
-            <div className="user-menu">
-              <span className="user-email">{session.user.email}</span>
-              <button onClick={handleLogout} className="btn-icon" title="Sair">
-                <LogOut size={20} />
-              </button>
-            </div>
+            <nav className="nav-tabs">
+              {tabs.map(tab => (
+                <button 
+                  key={tab}
+                  className={`nav-tab ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </nav>
           </header>
 
           <main className="dashboard-main">
-            <UploadPdf user={session.user} onUploadSuccess={handleUploadSuccess} />
-            <TenderList refreshTrigger={refreshList} />
+            {activeTab === 'Dashboard' ? (
+              <>
+                <UploadPdf user={session.user} onUploadSuccess={handleUploadSuccess} />
+                <TenderList refreshTrigger={refreshList} />
+              </>
+            ) : (
+              <div className="card empty-state">
+                <Diamond size={48} className="text-primary" style={{opacity: 0.5}} />
+                <h3>Módulo em Desenvolvimento</h3>
+                <p className="text-muted">A área de {activeTab} estará disponível nas próximas atualizações do LicitaPlus.</p>
+              </div>
+            )}
           </main>
-        </div>
+        </>
       )}
     </div>
   )
