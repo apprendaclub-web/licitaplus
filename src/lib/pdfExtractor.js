@@ -33,13 +33,13 @@ export async function extractTextFromPdf(file) {
  * @returns {Object} - Dados extraídos
  */
 export function parseTenderData(text) {
-  // Regex flexível: 'Edital n° X/YYYY' ou 'Edital X/YYYY'
-  const numberRegex = /Edital\s*(?:n[°º]\s*)?(\d+\/\d{4})/i
+  // Regex flexível: 'EDITAL DE LICITAÇÃO N° XXX/YYYY' ou 'Edital N° XXX/YYYY'
+  const numberRegex = /EDITAL(?: DE LICITAÇÃO)?\s*(?:N[°º]\s*)?(\d+\/\d{4})/i
   const numberMatch = text.match(numberRegex)
   const numero_edital = numberMatch ? numberMatch[1] : ''
 
-  // Regex flexível: captura de 'Objeto:' até a próxima quebra de linha
-  const objectRegex = /Objeto:\s*([^\n]+)/i
+  // Regex flexível: captura de 'Objeto:' até o primeiro ponto final ou a palavra 'VALOR'
+  const objectRegex = /Objeto:\s*([\s\S]*?)(?=\.|VALOR)/i
   const objectMatch = text.match(objectRegex)
   const objeto = objectMatch ? objectMatch[1].trim() : ''
 
