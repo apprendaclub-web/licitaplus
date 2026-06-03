@@ -24,9 +24,6 @@ export default function Auth() {
         password,
       })
       error = signUpError
-      if (!error) {
-        alert('Cadastro realizado! Verifique seu email para confirmar.')
-      }
     }
 
     if (error) {
