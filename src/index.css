@@ -511,3 +511,39 @@ input:focus, textarea:focus {
   display: flex;
   justify-content: flex-end;
 }
+
+/* Auth Component */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--surface-color);
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.auth-subtitle {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.auth-form {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.auth-switch {
+  font-size: 14px;
+  color: var(--text-muted);
+}
