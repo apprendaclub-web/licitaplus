@@ -3,8 +3,12 @@ import { supabase } from './supabaseClient'
 import Auth from './components/Auth'
 import UploadPdf from './components/UploadPdf'
 import TenderList from './components/TenderList'
+import Declaracoes from './components/Declaracoes'
+import Propostas from './components/Propostas'
+import Gestao from './components/Gestao'
 import { LogOut, Diamond } from 'lucide-react'
 import './index.css'
+import './licita-theme.css'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -71,6 +75,12 @@ function App() {
                 <UploadPdf user={session.user} onUploadSuccess={handleUploadSuccess} />
                 <TenderList refreshTrigger={refreshList} />
               </>
+            ) : activeTab === 'Declarações' ? (
+              <Declaracoes session={session} />
+            ) : activeTab === 'Propostas' ? (
+              <Propostas session={session} />
+            ) : activeTab === 'Gestão' ? (
+              <Gestao session={session} />
             ) : (
               <div className="card empty-state">
                 <Diamond size={48} className="text-primary" style={{opacity: 0.5}} />
