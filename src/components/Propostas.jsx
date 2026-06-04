@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { generateProposalPDF } from '../lib/pdfProposalGenerator';
-import { Plus, Trash2, Copy } from 'lucide-react';
+import { Plus, Trash2, Copy, Diamond } from 'lucide-react';
 
 export default function Propostas({ session }) {
   const [empresas, setEmpresas] = useState([]);
