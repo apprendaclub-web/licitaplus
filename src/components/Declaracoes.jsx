@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { DECLARATIONS } from '../lib/declarations';
 import { generateDeclarationsPDF } from '../lib/pdfGenerator';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, UploadCloud, Search, FileText } from 'lucide-react';
+import { extractTextFromPdf, parseTenderData } from '../lib/pdfExtractor';
 
 export default function Declaracoes({ session }) {
   const [empresas, setEmpresas] = useState([]);
@@ -17,6 +18,7 @@ export default function Declaracoes({ session }) {
     repCpf: '',
     repCargo: '',
     repRg: '',
+    logoB64: '',
     porte: 'NAO',
     incluirContador: false,
     contNome: '',
@@ -91,6 +93,36 @@ export default function Declaracoes({ session }) {
     setCustomDecs([...customDecs, { id: Date.now(), titulo: '', texto: '' }]);
   };
 
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await extractTextFromPdf(file);
+      const data = parseTenderData(text);
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          edital: data.numero_edital || prev.edital,
+          objeto: data.objeto || prev.objeto
+        }));
+        alert('Edital carregado e campos preenchidos automaticamente!');
+      }
+    } catch (err) {
+      alert('Erro ao extrair PDF');
+    }
+    e.target.value = '';
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setFormData(prev => ({ ...prev, logoB64: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const updateCustomDec = (id, field, value) => {
     setCustomDecs(customDecs.map(c => c.id === id ? { ...c, [field]: value } : c));
   };
@@ -124,7 +156,7 @@ export default function Declaracoes({ session }) {
 
     try {
       generateDeclarationsPDF(
-        { ...formData, data: formData.data.split('-').reverse().join('/') }, // basic date format
+        { ...formData, data: formData.data.split('-').reverse().join('/'), logoDataUrl: formData.logoB64 }, // basic date format
         finalSelected,
         formato
       );
@@ -138,6 +170,25 @@ export default function Declaracoes({ session }) {
   return (
     <div className="lp-container">
       <div className="lp-wrap" style={{ padding: '0 16px' }}>
+
+        <div className="panel" style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <FileText size={40} className="text-primary" style={{ opacity: 0.8 }} />
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--accent)', fontSize: '1.1rem' }}>Carregar Edital (extração automática)</h3>
+                <p style={{ margin: 0, color: 'var(--text-dim)', fontSize: '0.85rem' }}>Suba o PDF do edital e o sistema vai tentar preencher automaticamente os campos.</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <label className="btn-lp" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <UploadCloud size={18} /> Escolher PDF do Edital
+                <input type="file" accept=".pdf" style={{ display: 'none' }} onChange={handlePdfUpload} />
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div className="layout">
           <div>
             <div className="panel">
@@ -158,7 +209,12 @@ export default function Declaracoes({ session }) {
               <div className="row">
                 <div className="field">
                   <label>CNPJ</label>
-                  <input type="text" name="cnpj" value={formData.cnpj} onChange={handleInputChange} placeholder="00.000.000/0001-00" />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input type="text" name="cnpj" value={formData.cnpj} onChange={handleInputChange} placeholder="00.000.000/0001-00" />
+                    <button type="button" className="btn-lp" style={{ padding: '0 12px' }} title="Buscar na Receita Federal">
+                      <Search size={16} /> Buscar
+                    </button>
+                  </div>
                 </div>
                 <div className="field">
                   <label>Inscrição Estadual</label>
@@ -188,6 +244,17 @@ export default function Declaracoes({ session }) {
               <div className="field">
                 <label>RG</label>
                 <input type="text" name="repRg" value={formData.repRg} onChange={handleInputChange} placeholder="Ex: 000000000 SSP/RS" />
+              </div>
+
+              <div className="section-divider">Logo da Empresa (Opcional)</div>
+              <div className="field">
+                <label>Logo (PNG ou JPG — Aparecerá no topo das declarações)</label>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input type="file" accept="image/png, image/jpeg" onChange={handleLogoUpload} style={{ background: 'transparent', padding: 0, border: 'none' }} />
+                  {formData.logoB64 && (
+                    <button type="button" className="btn-ghost-lp" onClick={() => setFormData(prev => ({...prev, logoB64: ''}))}>Remover</button>
+                  )}
+                </div>
               </div>
 
               <div className="section-divider">Porte da Empresa</div>

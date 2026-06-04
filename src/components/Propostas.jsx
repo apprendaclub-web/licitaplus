@@ -18,6 +18,7 @@ export default function Propostas({ session }) {
     repCargo: '',
     telefone: '',
     email: '',
+    logoB64: '',
     orgao: '',
     modalidade: 'Pregão Eletrônico',
     edital: '',
@@ -91,6 +92,16 @@ export default function Propostas({ session }) {
     setItems(items.map(it => it.id === id ? { ...it, [field]: value } : it));
   };
 
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setFormData(prev => ({ ...prev, logoB64: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const addItem = () => {
     setItems([...items, { id: Date.now(), item: String(items.length + 1), codigo: '', descricao: '', marca: '', unidade: 'UN', tipoCalculo: 'qtd', qtd: '1', unitario: '' }]);
   };
@@ -129,7 +140,8 @@ export default function Propostas({ session }) {
         ...formData,
         data: formData.data.split('-').reverse().join('/'),
         items: items,
-        totalGeral: calculateTotal()
+        totalGeral: calculateTotal(),
+        logoDataUrl: formData.logoB64
       };
       generateProposalPDF(exportData, tipoProposta, itemsMode);
     } catch (e) {
@@ -216,6 +228,17 @@ export default function Propostas({ session }) {
                 <div className="field">
                   <label>Cargo</label>
                   <input type="text" name="repCargo" value={formData.repCargo} onChange={handleInputChange} />
+                </div>
+              </div>
+
+              <div className="section-divider">Logo da Proposta (Opcional)</div>
+              <div className="field">
+                <label>Logo (PNG ou JPG — Aparecerá no topo da proposta)</label>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input type="file" accept="image/png, image/jpeg" onChange={handleLogoUpload} style={{ background: 'transparent', padding: 0, border: 'none' }} />
+                  {formData.logoB64 && (
+                    <button type="button" className="btn-ghost-lp" onClick={() => setFormData(prev => ({...prev, logoB64: ''}))}>Remover</button>
+                  )}
                 </div>
               </div>
 
