@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 import Auth from './components/Auth'
-import UploadPdf from './components/UploadPdf'
-import TenderList from './components/TenderList'
 import Declaracoes from './components/Declaracoes'
 import Propostas from './components/Propostas'
 import Gestao from './components/Gestao'
@@ -12,10 +10,9 @@ import './licita-theme.css'
 
 function App() {
   const [session, setSession] = useState(null)
-  const [refreshList, setRefreshList] = useState(0)
-  const [activeTab, setActiveTab] = useState('Dashboard')
+  const [activeTab, setActiveTab] = useState('Declarações')
 
-  const tabs = ['Dashboard', 'Declarações', 'Propostas', 'Gestão']
+  const tabs = ['Declarações', 'Propostas', 'Gestão']
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -29,10 +26,6 @@ function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-  }
-
-  const handleUploadSuccess = () => {
-    setRefreshList(prev => prev + 1)
   }
 
   return (
@@ -70,12 +63,7 @@ function App() {
           </header>
 
           <main className="dashboard-main">
-            {activeTab === 'Dashboard' ? (
-              <>
-                <UploadPdf user={session.user} onUploadSuccess={handleUploadSuccess} />
-                <TenderList refreshTrigger={refreshList} />
-              </>
-            ) : activeTab === 'Declarações' ? (
+            {activeTab === 'Declarações' ? (
               <Declaracoes session={session} />
             ) : activeTab === 'Propostas' ? (
               <Propostas session={session} />
