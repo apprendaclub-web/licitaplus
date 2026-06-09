@@ -1,0 +1,6 @@
+{
+  "name": "Licita Plus",
+  "description": "Plataforma avançada para geração de declarações, propostas de preços e gestão estratégica de licitações públicas integrado com Supabase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
