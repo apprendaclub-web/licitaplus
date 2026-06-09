@@ -22,7 +22,9 @@ export default function CompanyManager({ companies, onRefreshCompanies, showToas
       setActiveModal(c);
     } else {
       setActiveModal({
-        razao_social: '', cnpj: '', ie: '', endereco: '', rep_nome: '', rep_cpf: '', rep_cargo: '', porte: 'ME', incluir_contador: false
+        razao_social: '', cnpj: '', ie: '', endereco: '', telefone: '', email: '', 
+        rep_nome: '', rep_cpf: '', rep_rg: '', rep_cargo: '', porte: 'ME', incluir_contador: false,
+        cont_nome: '', cont_crc: '', cont_cpf: '', cont_escritorio: ''
       });
     }
   };
@@ -37,8 +39,24 @@ export default function CompanyManager({ companies, onRefreshCompanies, showToas
       showToast('Razão Social e CNPJ são obrigatórios.', true);
       return;
     }
+    const payload = {
+      ...activeModal,
+      rep_rg: activeModal.rep_rg || '',
+      rep_cpf: activeModal.rep_cpf || '',
+      rep_nome: activeModal.rep_nome || '',
+      rep_cargo: activeModal.rep_cargo || '',
+      telefone: activeModal.telefone || '',
+      email: activeModal.email || '',
+      endereco: activeModal.endereco || '',
+      ie: activeModal.ie || '',
+      cont_nome: activeModal.cont_nome || '',
+      cont_cpf: activeModal.cont_cpf || '',
+      cont_crc: activeModal.cont_crc || '',
+      cont_escritorio: activeModal.cont_escritorio || ''
+    } as Company;
+
     try {
-      await apiSaveCompany(activeModal as Company);
+      await apiSaveCompany(payload);
       showToast('Empresa salva com sucesso!');
       onRefreshCompanies();
       handleCloseModal();
