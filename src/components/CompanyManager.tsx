@@ -193,8 +193,8 @@ export default function CompanyManager({ companies, onRefreshCompanies, showToas
               </button>
             </div>
             
-            <div className="p-5 overflow-y-auto space-y-4">
-               <form id="companyForm" onSubmit={handleSaveCompany} className="space-y-4">
+            <form id="companyForm" onSubmit={handleSaveCompany} className="flex flex-col min-h-0">
+              <div className="p-5 overflow-y-auto space-y-4">
                   {/* Basic Data */}
                   <div>
                     <label className="block text-xs uppercase font-mono text-[#8892a6] tracking-wider mb-1">Razão Social *</label>
@@ -379,17 +379,17 @@ export default function CompanyManager({ companies, onRefreshCompanies, showToas
                       </div>
                     )}
                   </div>
-               </form>
-            </div>
+              </div>
             
-            <div className="p-5 border-t border-[#2d3548] flex justify-end gap-3 bg-[#1e2538]">
-              <button onClick={handleCloseModal} className="px-5 py-2 rounded-lg bg-[#232a3d] hover:bg-[#2d3548] border border-[#2d3548] text-sm text-[#e8ebf0] font-semibold transition-all cursor-pointer">
-                Cancelar
-              </button>
-              <button form="companyForm" type="submit" className="px-6 py-2 rounded-lg bg-[#d4a574] hover:bg-[#e0b585] text-[#0f1419] font-bold text-sm transition-all cursor-pointer shadow-lg shadow-[#d4a574]/20">
-                Salvar Empresa
-              </button>
-            </div>
+              <div className="p-5 border-t border-[#2d3548] flex justify-end gap-3 bg-[#1e2538] flex-shrink-0">
+                <button type="button" onClick={handleCloseModal} className="px-5 py-2 rounded-lg bg-[#232a3d] hover:bg-[#2d3548] border border-[#2d3548] text-sm text-[#e8ebf0] font-semibold transition-all cursor-pointer">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-6 py-2 rounded-lg bg-[#d4a574] hover:bg-[#e0b585] text-[#0f1419] font-bold text-sm transition-all cursor-pointer shadow-lg shadow-[#d4a574]/20">
+                  Salvar Empresa
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
