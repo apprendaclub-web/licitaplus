@@ -8,7 +8,7 @@ import ProposalForm from './components/ProposalForm';
 import ManagementDashboard from './components/ManagementDashboard';
 import { 
   FileCheck, Shield, LogOut, CheckCircle, UploadCloud, Download, 
-  Trash2, AlertCircle, RefreshCw, FileText, Settings, Heart 
+  Trash2, AlertCircle, RefreshCw, FileText, Settings 
 } from 'lucide-react';
 
 export default function App() {
@@ -698,11 +698,7 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
       <footer className="border-t border-[#2d3548] bg-[#1a2030]/40 py-8 px-6 text-center text-xs text-[#8892a6]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-[#d4a574] font-bold">Licita Plus Premium v11.1</span>
-            <span className="text-[#2d3548]">|</span>
-            <p className="text-[11px] text-[#8892a6]/80 leading-relaxed text-left">
-              Estruturada sob premissas de privacidade integral e integrabilidade baseada em microsserviços do Supabase.
-            </p>
+            <span className="text-[10px] uppercase font-mono tracking-widest text-[#d4a574] font-bold">Licita Plus v11.1</span>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
@@ -728,7 +724,7 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
           </div>
         </div>
         <p className="text-[10px] mt-6 opacity-75">
-          Desenvolvido com <Heart className="w-3 h-3 text-red-500 inline mr-1 align-baseline fill-red-500" /> para maior eficiência técnica corporativa. Todos os direitos reservados, 2026.
+          Todos os direitos reservados, 2026.
         </p>
       </footer>
     </div>
