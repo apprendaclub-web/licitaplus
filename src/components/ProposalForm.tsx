@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Company, ItemProposta } from '../types';
 import { apiFetchCompanies, apiSaveCompany } from '../lib/db';
+import { validarCNPJ } from '../lib/utils';
 import { jsPDF } from 'jspdf';
 import { 
   Building2, Search, FileText, Check, Plus, Trash2, Edit3, DollarSign,
@@ -128,6 +129,12 @@ export default function ProposalForm({
       showToast('CNPJ com 14 dígitos é requerido.', true);
       return;
     }
+
+    if (!validarCNPJ(numericCnpj)) {
+      showToast('CNPJ inválido (Dígito Verificador incorreto).', true);
+      return;
+    }
+
     showToast('Acessando dados fiscais...');
     try {
       const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${numericCnpj}`);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Company, Orgao } from '../types';
 import { apiFetchCompanies, apiSaveCompany, apiDeleteCompany } from '../lib/db';
+import { validarCNPJ } from '../lib/utils';
 import { jsPDF } from 'jspdf';
 import { 
   Building2, Search, FileText, Check, Plus, Trash2, 
@@ -283,6 +284,11 @@ export default function DeclarativeGenerator({
     const numericCnpj = (currentCompany.cnpj || '').replace(/\D/g, '');
     if (numericCnpj.length !== 14) {
       showToast('Digite um CNPJ válido com 14 dígitos.', true);
+      return;
+    }
+
+    if (!validarCNPJ(numericCnpj)) {
+      showToast('CNPJ inválido (Dígito Verificador incorreto).', true);
       return;
     }
 

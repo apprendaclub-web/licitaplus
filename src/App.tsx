@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Company } from './types';
 import { supabase, isConfigured } from './lib/supabase';
-import { apiFetchCompanies, apiSaveCompany } from './lib/db';
+import { apiFetchCompanies, apiSaveCompany, apiFetchLicitacoes, apiFetchContratos, apiFetchOrgaos, apiFetchPortais } from './lib/db';
 import AuthScreen from './components/AuthScreen';
 import DeclarativeGenerator from './components/DeclarativeGenerator';
 import ProposalForm from './components/ProposalForm';
 import ManagementDashboard from './components/ManagementDashboard';
+import CompanyManager from './components/CompanyManager';
 import { 
   FileCheck, Shield, LogOut, CheckCircle, UploadCloud, Download, 
   Trash2, AlertCircle, RefreshCw, FileText, Settings 
@@ -15,7 +16,7 @@ export default function App() {
   const [session, setSession] = useState<any>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [sandboxMode, setSandboxMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<'declaracoes' | 'propostas' | 'gestao'>('declaracoes');
+  const [activeTab, setActiveTab] = useState<'declaracoes' | 'propostas' | 'gestao' | 'empresas'>('empresas');
 
   // Database lists
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -255,29 +256,38 @@ export default function App() {
   // ==========================================
   // MASTER BACKUP & RESTORE IMPO/EXPO
   // ==========================================
-  const exportCompaniesToJSON = () => {
-    if (companies.length === 0) {
-      showToast('Nenhuma empresa cadastrada para exportar.', true);
-      return;
-    }
+  const exportFullBackup = async () => {
     try {
+      showToast('Coletando dados para backup completo...');
+      const [allCompanies, allLicitacoes, allContratos, allOrgaos, allPortais] = await Promise.all([
+        apiFetchCompanies(),
+        apiFetchLicitacoes(),
+        apiFetchContratos(),
+        apiFetchOrgaos(),
+        apiFetchPortais()
+      ]);
+
       const backupObj = {
-        _tipo: 'LicitaPlus_Backup_Empresas',
-        _versao: '1.0',
+        _tipo: 'LicitaPlus_Backup_Completo',
+        _versao: '1.1',
         _data: new Date().toISOString(),
-        empresas: companies
+        empresas: allCompanies,
+        licitacoes: allLicitacoes,
+        contratos: allContratos,
+        orgaos: allOrgaos,
+        portais: allPortais
       };
 
       const datastr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(backupObj, null, 2));
       const dlAnchor = document.createElement('a');
       dlAnchor.setAttribute('href', datastr);
-      dlAnchor.setAttribute('download', `LicitaPlus_Empresas_${new Date().toISOString().split('T')[0]}.json`);
+      dlAnchor.setAttribute('download', `LicitaPlus_BackupFull_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(dlAnchor);
       dlAnchor.click();
       dlAnchor.remove();
-      showToast('Arquivo JSON de backup exportado!');
+      showToast('Arquivo JSON de backup completo exportado!');
     } catch (e) {
-      showToast('Erro ao exportar JSON.', true);
+      showToast('Erro ao exportar backup completo.', true);
     }
   };
 
@@ -360,6 +370,16 @@ export default function App() {
 
         {/* Master Navigation Buttons */}
         <nav className="flex bg-[#232a3d]/60 border border-[#2d3548] p-1 rounded-xl">
+          <button
+            onClick={() => setActiveTab('empresas')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === 'empresas'
+                ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
+                : 'text-[#8892a6] hover:text-[#e8ebf0]'
+            }`}
+          >
+            Aba Empresas
+          </button>
           <button
             onClick={() => setActiveTab('declaracoes')}
             className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
@@ -656,6 +676,14 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
 
         {/* ACTIVE MODULE CONTAINER */}
         <div className="animate-fade-in">
+          {activeTab === 'empresas' && (
+            <CompanyManager
+              companies={companies}
+              onRefreshCompanies={loadCompaniesForUser}
+              showToast={showToast}
+            />
+          )}
+
           {activeTab === 'declaracoes' && (
             <DeclarativeGenerator
               companies={companies}
@@ -716,10 +744,10 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
               Restaurar Backup (.json)
             </button>
             <button
-              onClick={exportCompaniesToJSON}
+              onClick={exportFullBackup}
               className="px-3 py-1.5 bg-[#232a3d] border border-[#2d3548] hover:border-[#8892a6] text-[10px] uppercase font-mono rounded hover:text-[#e8ebf0] transition-colors cursor-pointer"
             >
-              Backup de Empresas
+              Backup de Dados (Exportação)
             </button>
           </div>
         </div>
