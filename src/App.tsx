@@ -352,13 +352,8 @@ export default function App() {
       {/* TOP HEADER */}
       <header className="border-b border-[#2d3548] bg-[#1a2030]/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[#232a3d] border border-[#2d3548] text-[#d4a574]">
-            <FileCheck className="w-5 h-5" />
-          </div>
+          <img src="/Logo.png" alt="LICITA PLUS" className="h-10 w-auto" />
           <div>
-            <h1 className="text-lg font-serif font-bold text-[#d4a574] tracking-tight flex items-center gap-2">
-              <span>LICITA PLUS</span>
-            </h1>
             <p className="text-[10px] text-[#8892a6] uppercase tracking-wider font-mono">Governança e Geração Técnica</p>
           </div>
         </div>
