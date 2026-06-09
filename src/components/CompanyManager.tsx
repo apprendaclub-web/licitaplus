@@ -39,6 +39,13 @@ export default function CompanyManager({ companies, onRefreshCompanies, showToas
       showToast('Razão Social e CNPJ são obrigatórios.', true);
       return;
     }
+
+    const numericCnpj = activeModal.cnpj.replace(/\D/g, '');
+    if (numericCnpj.length !== 14 || !validarCNPJ(numericCnpj)) {
+      showToast('O CNPJ informado é inválido.', true);
+      return;
+    }
+
     const payload = {
       ...activeModal,
       rep_rg: activeModal.rep_rg || '',
