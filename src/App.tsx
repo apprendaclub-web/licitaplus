@@ -338,8 +338,8 @@ export default function App() {
       
       {/* Toast Alert Widget */}
       {toast && (
-        <div className="fixed top-6 right-6 z-50 animate-fade-in max-w-sm">
-          <div className={`p-4 rounded-xl border shadow-2xl flex gap-3 text-xs ${
+        <div className="fixed top-6 right-6 z-[9999] animate-fade-in max-w-sm">
+          <div className={`p-4 rounded-xl shadow-2xl flex items-start gap-3 border backdrop-blur-md text-xs ${
             toast.isError 
               ? 'bg-red-950/65 border-red-500/35 text-red-100' 
               : 'bg-emerald-950/65 border-emerald-500/35 text-emerald-100'
