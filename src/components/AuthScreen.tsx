@@ -78,7 +78,7 @@ export default function AuthScreen({ onSessionActive }: AuthScreenProps) {
         {/* Logo/Brand Header */}
         <div className="text-center mb-8 flex flex-col items-center">
           <img src="/Logo.png" alt="LICITA PLUS" className="h-16 w-auto mb-4" />
-          <p className="text-xs text-[#8892a6] mt-1.5 font-mono max-w-sm mx-auto leading-relaxed">
+          <p className="text-xs text-[#8892a6] mt-1.5 font-mono max-w-full md:whitespace-nowrap mx-auto leading-relaxed">
             Geração automatizada de documentos para processos licitatórios
           </p>
         </div>
