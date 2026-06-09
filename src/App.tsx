@@ -378,7 +378,7 @@ export default function App() {
                 : 'text-[#8892a6] hover:text-[#e8ebf0]'
             }`}
           >
-            Aba Empresas
+            Empresas
           </button>
           <button
             onClick={() => setActiveTab('declaracoes')}
@@ -388,7 +388,7 @@ export default function App() {
                 : 'text-[#8892a6] hover:text-[#e8ebf0]'
             }`}
           >
-            Aba Declarações
+            Declarações
           </button>
           <button
             onClick={() => setActiveTab('propostas')}
@@ -398,7 +398,7 @@ export default function App() {
                 : 'text-[#8892a6] hover:text-[#e8ebf0]'
             }`}
           >
-            Aba Propostas
+            Propostas
           </button>
           <button
             onClick={() => setActiveTab('gestao')}
@@ -408,7 +408,7 @@ export default function App() {
                 : 'text-[#8892a6] hover:text-[#e8ebf0]'
             }`}
           >
-            Aba Gestão
+            Gestão
           </button>
         </nav>
 
