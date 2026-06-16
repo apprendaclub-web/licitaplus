@@ -605,10 +605,10 @@ export default function ManagementDashboard({ companies, showToast }: Management
             </div>
 
             {/* List */}
-            <div className="overflow-x-auto min-h-[300px]">
+            <div className="overflow-auto min-h-[300px] max-h-[600px] relative">
               <table className="w-full text-xs text-[#e8ebf0] text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#232a3d] border-b border-[#2d3548]">
+                <thead className="sticky top-0 z-10 bg-[#232a3d] shadow-md">
+                  <tr className="border-b border-[#2d3548]">
                     <th className="p-3 text-[#d4a574]">Empresa Licitante</th>
                     <th className="p-3">Processo</th>
                     <th className="p-3">Órgão Licitante</th>
@@ -623,8 +623,16 @@ export default function ManagementDashboard({ companies, showToast }: Management
                 <tbody>
                   {listBids.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center text-[#8892a6] italic">
-                        Nenhum certame cadastrado ou encontrado conforme filtros.
+                      <td colSpan={9} className="p-8 text-center">
+                        <p className="text-[#8892a6] italic mb-3">
+                          Nenhum certame cadastrado ou encontrado conforme filtros.
+                        </p>
+                        <button
+                          onClick={() => handleOpenBidModal()}
+                          className="text-[#d4a574] hover:text-[#e0b585] font-semibold underline transition-colors cursor-pointer"
+                        >
+                          Clique aqui para cadastrar sua primeira licitação
+                        </button>
                       </td>
                     </tr>
                   ) : (

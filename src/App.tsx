@@ -375,7 +375,7 @@ export default function App() {
             className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'empresas'
                 ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
-                : 'text-[#8892a6] hover:text-[#e8ebf0]'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Empresas
@@ -385,7 +385,7 @@ export default function App() {
             className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'declaracoes'
                 ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
-                : 'text-[#8892a6] hover:text-[#e8ebf0]'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Declarações
@@ -395,7 +395,7 @@ export default function App() {
             className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'propostas'
                 ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
-                : 'text-[#8892a6] hover:text-[#e8ebf0]'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Propostas
@@ -405,7 +405,7 @@ export default function App() {
             className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'gestao'
                 ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
-                : 'text-[#8892a6] hover:text-[#e8ebf0]'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Gestão
