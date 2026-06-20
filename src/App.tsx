@@ -381,6 +381,16 @@ export default function App() {
             Empresas
           </button>
           <button
+            onClick={() => setActiveTab('gestao')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === 'gestao'
+                ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            Certames
+          </button>
+          <button
             onClick={() => setActiveTab('declaracoes')}
             className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'declaracoes'
@@ -399,16 +409,6 @@ export default function App() {
             }`}
           >
             Propostas
-          </button>
-          <button
-            onClick={() => setActiveTab('gestao')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === 'gestao'
-                ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
-                : 'text-gray-300 hover:text-white'
-            }`}
-          >
-            Gestão
           </button>
         </nav>
 

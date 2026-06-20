@@ -609,30 +609,40 @@ export default function ManagementDashboard({ companies, showToast }: Management
               <table className="w-full text-xs text-[#e8ebf0] text-left border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#232a3d] shadow-md">
                   <tr className="border-b border-[#2d3548]">
-                    <th className="p-3 text-[#d4a574]">Empresa Licitante</th>
-                    <th className="p-3">Processo</th>
-                    <th className="p-3">Órgão Licitante</th>
-                    <th className="p-3">Portal de Compras</th>
-                    <th className="p-3 font-semibold text-center">Status</th>
-                    <th className="p-3 text-center">Sessão / Abertura</th>
-                    <th className="p-3 text-right">Valor Est.</th>
-                    <th className="p-3 text-center">Ganhos</th>
-                    <th className="p-3 text-center">Ações</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] text-[#d4a574] z-10">Empresa Licitante</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] z-10">Processo</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] z-10">Órgão Licitante</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] z-10">Portal de Compras</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] font-semibold text-center z-10">Status</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] text-center z-10">Sessão / Abertura</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] text-right z-10">Valor Est.</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] text-center z-10">Ganhos</th>
+                    <th className="sticky top-0 p-3 bg-[#232a3d] text-center z-10">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listBids.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center">
-                        <p className="text-[#8892a6] italic mb-3">
-                          Nenhum certame cadastrado ou encontrado conforme filtros.
-                        </p>
-                        <button
-                          onClick={() => handleOpenBidModal()}
-                          className="text-[#d4a574] hover:text-[#e0b585] font-semibold underline transition-colors cursor-pointer"
-                        >
-                          Clique aqui para cadastrar sua primeira licitação
-                        </button>
+                      <td colSpan={9} className="p-12 text-center">
+                        <div className="flex flex-col items-center justify-center max-w-md mx-auto py-6 space-y-4">
+                          <div className="p-4 bg-[#232a3d]/50 border border-[#2d3548] rounded-full text-[#8892a6]">
+                            <Archive className="w-8 h-8" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-[#e8ebf0]">Nenhum certame cadastrado</h4>
+                            <p className="text-xs text-[#8892a6] mt-1">
+                              Comece cadastrando suas licitações para acompanhar prazos, valores e comissões de forma centralizada.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenBidModal()}
+                            className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-[#d4a574]/10 hover:bg-[#d4a574]/20 border border-[#d4a574]/30 hover:border-[#d4a574]/50 text-[#d4a574] text-xs font-semibold rounded-lg transition-all cursor-pointer shadow-sm shadow-[#d4a574]/5"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Clique aqui para cadastrar sua primeira licitação</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ) : (
