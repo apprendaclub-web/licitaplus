@@ -7,6 +7,7 @@ import DeclarativeGenerator from './components/DeclarativeGenerator';
 import ProposalForm from './components/ProposalForm';
 import ManagementDashboard from './components/ManagementDashboard';
 import CompanyManager from './components/CompanyManager';
+import PncpSearchTest from './components/PncpSearchTest';
 import { 
   FileCheck, Shield, LogOut, CheckCircle, UploadCloud, Download, 
   Trash2, AlertCircle, RefreshCw, FileText, Settings 
@@ -714,10 +715,16 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
           )}
 
           {activeTab === 'gestao' && (
-            <ManagementDashboard
-              companies={companies}
-              showToast={showToast}
-            />
+            <div className="space-y-6">
+              <PncpSearchTest
+                userId={session?.user?.id}
+                showToast={showToast}
+              />
+              <ManagementDashboard
+                companies={companies}
+                showToast={showToast}
+              />
+            </div>
           )}
         </div>
       </main>
