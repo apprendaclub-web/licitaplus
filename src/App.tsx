@@ -712,12 +712,12 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
         {activeTab !== 'gestao' && (
           <div className="bg-[#1a2030] border border-[#d4a574]/20 rounded-xl p-6 shadow-xl flex flex-col lg:flex-row items-center gap-6 justify-between">
             <div className="space-y-2 text-center lg:text-left flex-1">
-              <h2 className="text-md font-serif font-bold text-[#d4a574] flex items-center gap-1.5 justify-center lg:justify-start">
-                <UploadCloud className="w-5 h-5 text-[#d4a574]" />
-                <span>Carregar Edital (extração automática)</span>
+              <h2 className="text-md font-serif font-bold text-[#d4a574] flex items-center gap-2 justify-center lg:justify-start">
+                <Sparkles className="w-5 h-5 text-[#d4a574]" />
+                <span>Analise Editais com IA (Extração Automática)</span>
               </h2>
-              <p className="text-xs text-[#8892a6] max-w-2xl leading-relaxed">
-                Suba o PDF do edital e o sistema vai tentar preencher automaticamente os campos comuns (modalidade, número, órgão, objeto, datas, valores). Arquivos não saem do seu navegador.
+              <p className="text-xs text-[#b2bcd0] max-w-2xl leading-relaxed font-medium">
+                Suba o PDF do edital e nosso motor de IA analisará instantaneamente os pontos críticos: prazos, garantias, exigências e riscos.
               </p>
             </div>
 
