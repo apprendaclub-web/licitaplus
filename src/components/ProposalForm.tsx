@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Company, ItemProposta } from '../types';
-import { apiFetchCompanies, apiSaveCompany } from '../lib/db';
+import { Company, ItemProposta, Licitacao } from '../types';
+import { apiFetchCompanies, apiSaveCompany, apiFetchLicitacoes, apiSaveLicitacao } from '../lib/db';
 import { validarCNPJ } from '../lib/utils';
 import { jsPDF } from 'jspdf';
 import { 
   Building2, Search, FileText, Check, Plus, Trash2, Edit3, DollarSign,
-  Briefcase, FolderOpen, Calendar, Archive, Key, HelpCircle, ArrowRight
+  Briefcase, FolderOpen, Calendar, Archive, Key, HelpCircle, ArrowRight,
+  Sparkles, Cpu, AlertTriangle
 } from 'lucide-react';
 
 interface ProposalFormProps {
@@ -18,6 +19,8 @@ interface ProposalFormProps {
   objeto: string;
   cidade: string;
   dataAssinatura: string;
+  editalFullText?: string;
+  aiAnalysisResult?: any;
   onCopyFromDeclarations: () => void;
   showToast: (msg: string, isError?: boolean) => void;
 }
@@ -42,6 +45,8 @@ export default function ProposalForm({
   companies,
   onRefreshCompanies,
   orgao, modalidade, edital, objeto, cidade, dataAssinatura,
+  editalFullText,
+  aiAnalysisResult,
   onCopyFromDeclarations,
   showToast
 }: ProposalFormProps) {
@@ -88,6 +93,127 @@ export default function ProposalForm({
     habilitacao: false
   });
   const [customEmbeds, setCustomEmbeds] = useState<{ id: string; titulo: string; texto: string }[]>([]);
+
+  const [editalText, setEditalText] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+
+  // Carrega análise existente se a licitação já estiver no banco
+  useEffect(() => {
+    const fetchExistingAnalysis = async () => {
+      if (!edital || !propCompany.razao_social) return;
+      try {
+        const bids = await apiFetchLicitacoes();
+        const match = bids.find(
+          b => b.processo === edital && b.empresa === propCompany.razao_social
+        );
+        if (match && match.ia_analise) {
+          setAnalysisResult(match.ia_analise);
+        } else {
+          setAnalysisResult(null);
+        }
+      } catch (e) {
+        console.error('Erro ao buscar análise de edital:', e);
+      }
+    };
+    fetchExistingAnalysis();
+  }, [edital, propCompany.razao_social]);
+
+  // Sincroniza o texto bruto do PDF extraído no App.tsx
+  useEffect(() => {
+    if (editalFullText) {
+      setEditalText(editalFullText);
+    }
+  }, [editalFullText]);
+
+  // Sincroniza o resultado da análise automática feita no App.tsx
+  useEffect(() => {
+    if (aiAnalysisResult) {
+      setAnalysisResult(aiAnalysisResult);
+    }
+  }, [aiAnalysisResult]);
+
+  const handleAiAnalysis = async () => {
+    if (!editalText.trim()) {
+      showToast('Por favor, digite ou carregue o texto de um edital para analisar.', true);
+      return;
+    }
+
+    setAnalyzing(true);
+    showToast('Iniciando análise inteligente com GPT-4o...');
+
+    try {
+      const response = await fetch('/api/analyze-edital', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: editalText }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Erro na chamada do microsserviço de IA.');
+      }
+
+      const data = await response.json();
+      setAnalysisResult(data);
+
+      // Persistir no banco de dados (Supabase ou localstorage)
+      showToast('Salvando dados na tabela de licitações...');
+      const bids = await apiFetchLicitacoes();
+      const match = bids.find(
+        b => b.processo === edital && b.empresa === propCompany.razao_social
+      );
+
+      const bidToSave: Licitacao = match
+        ? {
+            ...match,
+            ia_analise: data,
+          }
+        : {
+            id: 'lc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            empresa: propCompany.razao_social || 'Empresa Não Selecionada',
+            orgao_nome: orgao || 'Órgão Não Informado',
+            processo: edital || 'Edital Não Informado',
+            portal: 'Outros',
+            status: 'aberta' as const,
+            objeto: objeto || data.objeto || 'Não especificado',
+            valor_est: 0,
+            valor_prop: 0,
+            timeline: [],
+            ia_analise: data,
+          };
+
+      await apiSaveLicitacao(bidToSave);
+      showToast('Edital analisado com IA e persistido com sucesso!');
+    } catch (err: any) {
+      console.error(err);
+      showToast('Erro ao realizar análise: ' + err.message, true);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleApplyAiData = () => {
+    if (!analysisResult) return;
+
+    let count = 0;
+    if (analysisResult.prazo_entrega && analysisResult.prazo_entrega !== 'Não especificado') {
+      setPrazoEntrega(analysisResult.prazo_entrega);
+      count++;
+    }
+    if (analysisResult.garantias && analysisResult.garantias !== 'Não especificado') {
+      setGarantia(analysisResult.garantias);
+      count++;
+    }
+
+    if (count > 0) {
+      showToast(`${count} campo(s) atualizado(s) com sucesso no formulário!`);
+    } else {
+      showToast('Nenhuma informação válida ou diferente para aplicar.', true);
+    }
+  };
 
   // Local sync
   useEffect(() => {
@@ -1167,6 +1293,110 @@ export default function ProposalForm({
           </div>
         </div>
 
+      </div>
+
+      {/* SEÇÃO DE ANÁLISE DE EDITAL COM IA */}
+      <div className="bg-[#1a2030] border border-[#2d3548] rounded-xl p-6 shadow-xl space-y-6 mt-8">
+        <div className="flex border-b border-[#2d3548] pb-3 mb-2 justify-between items-center flex-wrap gap-2">
+          <h3 className="font-serif font-bold text-md text-[#d4a574] flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#d4a574]" />
+            <span>Análise de Edital com IA</span>
+          </h3>
+          <span className="text-[10px] uppercase font-mono text-[#8892a6]">Powered by GPT-4o</span>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[11px] uppercase text-[#8892a6] mb-1.5">Texto do Edital para Inspecionar</label>
+            <textarea
+              value={editalText}
+              onChange={(e) => setEditalText(e.target.value)}
+              placeholder="Cole o texto bruto do edital aqui (ou carregue o arquivo PDF no topo da página para extração automática)..."
+              className="w-full bg-[#232a3d] border border-[#2d3548] rounded-lg px-3 py-2.5 text-xs text-[#e8ebf0] focus:outline-none h-44 resize-y leading-relaxed"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleAiAnalysis}
+              disabled={analyzing || !editalText.trim()}
+              className="px-5 py-2.5 bg-[#d4a574] hover:bg-[#e0b585] text-[#0f1419] font-bold text-xs rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {analyzing ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-[#0f1419] border-t-transparent rounded-full animate-spin"></div>
+                  <span>Inspecionando Edital...</span>
+                </>
+              ) : (
+                <>
+                  <Cpu className="w-4 h-4" />
+                  <span>Analisar Edital com IA</span>
+                </>
+              )}
+            </button>
+            {analysisResult && (
+              <button
+                type="button"
+                onClick={handleApplyAiData}
+                className="px-5 py-2.5 bg-[#232a3d] border border-[#2d3548] hover:border-[#d4a574] text-[#d4a574] text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                <span>Aplicar Prazos e Garantias</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* RESULTADOS DA ANÁLISE */}
+        {analysisResult && (
+          <div className="bg-[#232a3d]/45 border border-[#d4a574]/20 rounded-xl p-5 space-y-4 animate-fade-in text-xs leading-relaxed">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
+              <div className="md:col-span-2 bg-[#1a2030]/60 p-3.5 rounded-lg border border-[#2d3548]">
+                <h4 className="text-[10px] uppercase font-mono text-[#d4a574] font-bold mb-1">Objeto do Contrato / Edital</h4>
+                <p className="text-[#e8ebf0]">{analysisResult.objeto}</p>
+              </div>
+
+              <div className="bg-[#1a2030]/60 p-3.5 rounded-lg border border-[#2d3548]">
+                <h4 className="text-[10px] uppercase font-mono text-[#d4a574] font-bold mb-1">Prazo de Entrega / Execução</h4>
+                <p className="text-[#e8ebf0]">{analysisResult.prazo_entrega}</p>
+              </div>
+
+              <div className="bg-[#1a2030]/60 p-3.5 rounded-lg border border-[#2d3548]">
+                <h4 className="text-[10px] uppercase font-mono text-[#d4a574] font-bold mb-1">Exigência de Garantias</h4>
+                <p className="text-[#e8ebf0]">{analysisResult.garantias}</p>
+              </div>
+
+              <div className="bg-[#1a2030]/60 p-3.5 rounded-lg border border-[#2d3548]">
+                <h4 className="text-[10px] uppercase font-mono text-[#d4a574] font-bold mb-1">Exigências de Habilitação Técnica</h4>
+                {Array.isArray(analysisResult.exigencias_habilitacao) ? (
+                  <ul className="list-disc pl-4 space-y-1 text-[#e8ebf0] mt-1">
+                    {analysisResult.exigencias_habilitacao.map((item: string, idx: number) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[#e8ebf0]">{analysisResult.exigencias_habilitacao}</p>
+                )}
+              </div>
+
+              <div className="bg-[#1a2030]/60 p-3.5 rounded-lg border border-red-950/20 bg-red-950/5">
+                <h4 className="text-[10px] uppercase font-mono text-red-400 font-bold mb-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-red-400" />
+                  <span>Cláusulas de Risco / Restrições Severas</span>
+                </h4>
+                <p className="text-red-200/90">{analysisResult.riscos}</p>
+              </div>
+
+            </div>
+            
+            <div className="border-t border-[#2d3548] pt-3 text-[10px] text-[#8892a6] font-mono flex items-center gap-1.5 justify-end">
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Análise gravada automaticamente na licitação do banco de dados.</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

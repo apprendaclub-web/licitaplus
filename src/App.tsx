@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Company } from './types';
+import { Company, Licitacao } from './types';
 import { supabase, isConfigured } from './lib/supabase';
-import { apiFetchCompanies, apiSaveCompany, apiFetchLicitacoes, apiFetchContratos, apiFetchOrgaos, apiFetchPortais } from './lib/db';
+import { apiFetchCompanies, apiSaveCompany, apiFetchLicitacoes, apiSaveLicitacao, apiFetchContratos, apiFetchOrgaos, apiFetchPortais } from './lib/db';
 import AuthScreen from './components/AuthScreen';
 import DeclarativeGenerator from './components/DeclarativeGenerator';
 import ProposalForm from './components/ProposalForm';
@@ -10,7 +10,7 @@ import CompanyManager from './components/CompanyManager';
 import PncpSearchTest from './components/PncpSearchTest';
 import { 
   FileCheck, Shield, LogOut, CheckCircle, UploadCloud, Download, 
-  Trash2, AlertCircle, RefreshCw, FileText, Settings 
+  Trash2, AlertCircle, RefreshCw, FileText, Settings, Sparkles
 } from 'lucide-react';
 
 export default function App() {
@@ -31,6 +31,9 @@ export default function App() {
   const [objeto, setObjeto] = useState('Aquisição de materiais pedagógicos e brinquedos psicomotores para atendimento das creches.');
   const [cidade, setCidade] = useState('Arroio do Sal');
   const [dataAssinatura, setDataAssinatura] = useState(() => new Date().toISOString().split('T')[0]);
+  const [editalFullText, setEditalFullText] = useState('');
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
+  const [analyzingWithAi, setAnalyzingWithAi] = useState(false);
 
   // PDF Loading indicator
   const [parsingPdf, setParsingPdf] = useState(false);
@@ -170,7 +173,9 @@ export default function App() {
 
           // Apply regex sequence specified in specs
           applyEdictRegexes(fullText);
+          setEditalFullText(fullText);
           showToast(`Análise concluída! ${pdf.numPages} páginas inspecionadas.`);
+          triggerAiAnalysis(fullText);
         } catch (err: any) {
           console.error(err);
           showToast('Erro de decodificação: ' + (err.message || 'O PDF pode conter apenas imagens.'), true);
@@ -251,6 +256,87 @@ export default function App() {
     if (extractedObj) {
       if (extractedObj.length > 250) extractedObj = extractedObj.substring(0, 245) + '...';
       setObjeto(extractedObj);
+    }
+  };
+
+  const triggerAiAnalysis = async (text: string) => {
+    setAnalyzingWithAi(true);
+    showToast('Iniciando análise com IA (GPT-4o)...');
+    try {
+      const response = await fetch('/api/analyze-edital', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro na chamada da API de IA.');
+      }
+
+      const data = await response.json();
+      setAiAnalysisResult(data);
+
+      // Extract edital details to save to db
+      let extractedNum = '';
+      const numRegexes = [
+        /edital\s*(?:nº|n\.º)?\s*(\d+[\d./-]*)/i,
+        /processo\s*(?:nº|n\.º)?\s*(\d+[\d./-]*)/i,
+        /licita[cç][aã]o\s*(?:nº|n\.º)?\s*(\d+[\d./-]*)/i
+      ];
+      for (const rx of numRegexes) {
+        const match = text.match(rx);
+        if (match && match[1]) {
+          extractedNum = match[1].trim();
+          break;
+        }
+      }
+
+      let extractedOrg = '';
+      const orgPatterns = [
+        /prefeitura\s+municipal\s+de\s+([A-Za-zÀ-ÿ\s-]+)/i,
+        /c[âa]mara\s+municipal\s+de\s+([A-Za-zÀ-ÿ\s-]+)/i,
+        /secretaria\s+municipal\s+de\s+([A-Za-zÀ-ÿ\s-]+)/i,
+        /cons[oó]rcio\s+de\s+([A-Za-zÀ-ÿ\s-]+)/i
+      ];
+      for (const rx of orgPatterns) {
+        const match = text.match(rx);
+        if (match && match[0]) {
+          extractedOrg = match[0].trim();
+          break;
+        }
+      }
+
+      const bids = await apiFetchLicitacoes();
+      const match = bids.find(b => b.processo === extractedNum);
+
+      const bidToSave: Licitacao = match
+        ? {
+            ...match,
+            ia_analise: data,
+          }
+        : {
+            id: 'lc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            empresa: 'Carregado via PDF',
+            orgao_nome: extractedOrg || 'Órgão Não Informado',
+            processo: extractedNum || 'Edital Não Informado',
+            portal: 'Outros',
+            status: 'aberta' as const,
+            objeto: data.objeto || 'Não especificado',
+            valor_est: 0,
+            valor_prop: 0,
+            timeline: [],
+            ia_analise: data,
+          };
+
+      await apiSaveLicitacao(bidToSave);
+      showToast('Análise de IA concluída e salva no banco de dados!');
+    } catch (err: any) {
+      console.error(err);
+      showToast('Erro ao realizar análise de IA: ' + err.message, true);
+    } finally {
+      setAnalyzingWithAi(false);
     }
   };
 
@@ -532,6 +618,7 @@ CREATE TABLE IF NOT EXISTS public.licitaplus_licitacoes (
     valor_prop NUMERIC NOT NULL DEFAULT 0,
     obs TEXT,
     timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
+    ia_analise JSONB DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE public.licitaplus_licitacoes ENABLE ROW LEVEL SECURITY;
@@ -663,6 +750,8 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
                   setModalidade('Pregão Eletrônico');
                   setEdital('');
                   setObjeto('');
+                  setEditalFullText('');
+                  setAiAnalysisResult(null);
                   showToast('Campos extraídos recolhidos e limpos!');
                 }}
                 title="Limpa os campos extraídos automaticamente"
@@ -672,6 +761,70 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
                 <span>Limpar extraído</span>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* AI ANALYSIS INSIGHTS CARD */}
+        {activeTab !== 'gestao' && (analyzingWithAi || aiAnalysisResult) && (
+          <div className="bg-[#1a2030] border border-[#d4a574]/20 rounded-xl p-6 shadow-xl space-y-4 animate-fade-in">
+            <div className="flex items-center justify-between border-b border-[#2d3548] pb-3">
+              <h3 className="font-serif font-bold text-md text-[#d4a574] flex items-center gap-2">
+                <Sparkles className="w-5 h-5 animate-pulse text-[#d4a574]" />
+                <span>Resultados da Análise de Edital com IA</span>
+              </h3>
+              {analyzingWithAi ? (
+                <span className="text-xs text-[#8892a6] font-mono animate-pulse">Processando edital com GPT-4o...</span>
+              ) : (
+                <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Concluído e Salvo</span>
+                </span>
+              )}
+            </div>
+
+            {analyzingWithAi ? (
+              <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                <div className="w-8 h-8 border-3 border-[#d4a574] border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-xs text-[#8892a6] font-mono">Inspecionando cláusulas jurídicas, técnicas e comerciais...</p>
+              </div>
+            ) : (
+              aiAnalysisResult && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed">
+                  <div className="md:col-span-2 bg-[#232a3d]/50 p-4 rounded-lg border border-[#2d3548]">
+                    <span className="text-[10px] uppercase font-mono text-[#d4a574] font-bold block mb-1">Objeto do Edital</span>
+                    <p className="text-[#e8ebf0]">{aiAnalysisResult.objeto}</p>
+                  </div>
+
+                  <div className="bg-[#232a3d]/50 p-4 rounded-lg border border-[#2d3548]">
+                    <span className="text-[10px] uppercase font-mono text-[#d4a574] font-bold block mb-1">Prazo de Entrega / Execução</span>
+                    <p className="text-[#e8ebf0]">{aiAnalysisResult.prazo_entrega}</p>
+                  </div>
+
+                  <div className="bg-[#232a3d]/50 p-4 rounded-lg border border-[#2d3548]">
+                    <span className="text-[10px] uppercase font-mono text-[#d4a574] font-bold block mb-1">Exigência de Garantias</span>
+                    <p className="text-[#e8ebf0]">{aiAnalysisResult.garantias}</p>
+                  </div>
+
+                  <div className="bg-[#232a3d]/50 p-4 rounded-lg border border-[#2d3548]">
+                    <span className="text-[10px] uppercase font-mono text-[#d4a574] font-bold block mb-1">Requisitos de Habilitação Técnica</span>
+                    {Array.isArray(aiAnalysisResult.exigencias_habilitacao) ? (
+                      <ul className="list-disc pl-4 space-y-1 mt-1 text-[#e8ebf0]">
+                        {aiAnalysisResult.exigencias_habilitacao.map((ex: string, i: number) => (
+                          <li key={i}>{ex}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-[#e8ebf0]">{aiAnalysisResult.exigencias_habilitacao}</p>
+                    )}
+                  </div>
+
+                  <div className="bg-[#232a3d]/50 p-4 rounded-lg border border-red-950/30 bg-red-950/5">
+                    <span className="text-[10px] uppercase font-mono text-red-400 font-bold block mb-1">Cláusulas de Risco ou Restrições Severas</span>
+                    <p className="text-red-200/90">{aiAnalysisResult.riscos}</p>
+                  </div>
+                </div>
+              )
+            )}
           </div>
         )}
 
@@ -709,6 +862,8 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
               objeto={objeto}
               cidade={cidade}
               dataAssinatura={dataAssinatura}
+              editalFullText={editalFullText}
+              aiAnalysisResult={aiAnalysisResult}
               onCopyFromDeclarations={handlePropCopyTrigger}
               showToast={showToast}
             />

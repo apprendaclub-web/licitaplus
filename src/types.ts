@@ -47,6 +47,7 @@ export interface Licitacao {
   valor_prop: number;
   obs?: string;
   timeline: TimelineEvent[];
+  ia_analise?: any;
   created_at?: string;
 }
 
