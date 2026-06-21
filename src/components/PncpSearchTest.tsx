@@ -143,10 +143,10 @@ export default function PncpSearchTest({ userId, showToast }: PncpSearchTestProp
         <div>
           <h3 className="text-lg font-serif font-bold text-[#d4a574] flex items-center gap-2">
             <Search className="w-5 h-5" />
-            <span>Pesquisa Pública PNCP (Testador)</span>
+            <span>Busca de Oportunidades PNCP</span>
           </h3>
           <p className="text-xs text-[#8892a6] mt-1">
-            Consulte editais de Pregão Eletrônico diretamente do Portal Nacional de Contratações Públicas.
+            Consulte licitações em tempo real direto do portal oficial.
           </p>
         </div>
       </div>
