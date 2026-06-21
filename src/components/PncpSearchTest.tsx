@@ -135,13 +135,15 @@ export default function PncpSearchTest({ userId, showToast }: PncpSearchTestProp
       resultado: '',
       valor_prop: 0,
       obs: 'Licitação importada da pesquisa pública do PNCP.',
-      timeline: JSON.stringify([
+      timeline: [
         {
-          date: new Date().toISOString(),
-          title: 'Importada do PNCP',
-          description: 'A oportunidade foi salva via painel de pesquisa PNCP.'
+          id: 'ev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          tipo: 'status',
+          msg: 'A oportunidade foi salva via painel de pesquisa PNCP.',
+          autor: 'Sistema PNCP',
+          dt: new Date().toISOString()
         }
-      ])
+      ] as any
     };
 
     try {

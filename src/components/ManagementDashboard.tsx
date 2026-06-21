@@ -144,7 +144,25 @@ export default function ManagementDashboard({ companies, showToast }: Management
   // ==========================================
   const handleOpenBidModal = (bid?: Licitacao) => {
     if (bid) {
-      setActiveBidModal(bid);
+      let parsedTimeline: any[] = [];
+      try {
+        if (bid.timeline) {
+          parsedTimeline = typeof bid.timeline === 'string'
+            ? JSON.parse(bid.timeline)
+            : bid.timeline;
+        }
+      } catch (e) {
+        console.error('Erro ao converter timeline:', e);
+      }
+
+      if (!Array.isArray(parsedTimeline)) {
+        parsedTimeline = [];
+      }
+
+      setActiveBidModal({
+        ...bid,
+        timeline: parsedTimeline
+      });
     } else {
       setActiveBidModal({
         id: 'lc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -1184,17 +1202,17 @@ export default function ManagementDashboard({ companies, showToast }: Management
                       Nenhuma anotação gravada neste certame.
                     </p>
                   ) : (
-                    activeBidModal.timeline.slice().reverse().map(e => (
-                      <div key={e.id} className="p-2.5 bg-[#232a3d]/40 border border-[#2d3548] rounded-lg flex justify-between items-start gap-3">
+                    activeBidModal.timeline.slice().reverse().map((e: any, idx: number) => (
+                      <div key={e?.id || `ev-${idx}`} className="p-2.5 bg-[#232a3d]/40 border border-[#2d3548] rounded-lg flex justify-between items-start gap-3">
                         <div className="text-[11px] leading-relaxed">
                           <span className="font-bold text-[#e8ebf0] block">
-                            {e.tipo.toUpperCase()} • {e.autor} ou Fornecedor <span className="text-[10px] text-[#8892a6] font-normal font-mono">({formatDateTime(e.dt)})</span>
+                            {(e?.tipo || e?.title || 'Anotação').toUpperCase()} • {e?.autor || 'Sistema'} <span className="text-[10px] text-[#8892a6] font-normal font-mono">({formatDateTime(e?.dt || e?.date || new Date().toISOString())})</span>
                           </span>
-                          <span className="text-[#8892a6] mt-0.5 block">{e.msg}</span>
+                          <span className="text-[#8892a6] mt-0.5 block">{e?.msg || e?.description || ''}</span>
                         </div>
                         <button
                           type="button"
-                          onClick={() => handleDeleteTimelineEvent(e.id)}
+                          onClick={() => handleDeleteTimelineEvent(e?.id || '')}
                           className="text-red-400 hover:text-red-300 px-1.5 cursor-pointer"
                         >
                           ×
