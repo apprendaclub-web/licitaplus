@@ -39,7 +39,7 @@ export default function PncpSearchTest({ userId, showToast }: PncpSearchTestProp
       tamanhoPagina: '15'
     });
 
-    if (uf.trim()) {
+    if (uf && uf.trim()) {
       params.append('uf', uf.trim().toUpperCase());
     }
 
@@ -48,10 +48,36 @@ export default function PncpSearchTest({ userId, showToast }: PncpSearchTestProp
       if (!response.ok) {
         throw new Error(`Erro na API do PNCP (Código ${response.status})`);
       }
-      const data = await response.json();
-      setResults(data.data || []);
+
+      // Check if status is 204 (No Content)
+      if (response.status === 204) {
+        setResults([]);
+        if (showToast) {
+          showToast('Nenhum resultado encontrado para este filtro.');
+        }
+        return;
+      }
+
+      // Read response as text first to safely check for empty content
+      const text = await response.text();
+      if (!text || !text.trim()) {
+        setResults([]);
+        if (showToast) {
+          showToast('Nenhum resultado encontrado para este filtro.');
+        }
+        return;
+      }
+
+      const data = JSON.parse(text);
+      const items = data.data || [];
+      setResults(items);
+
       if (showToast) {
-        showToast(`Busca concluída! ${data.data?.length || 0} licitações encontradas.`);
+        if (items.length === 0) {
+          showToast('Nenhum resultado encontrado para este filtro.');
+        } else {
+          showToast(`Busca concluída! ${items.length} licitações encontradas.`);
+        }
       }
     } catch (err: any) {
       console.error(err);
