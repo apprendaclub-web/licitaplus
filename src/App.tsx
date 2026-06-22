@@ -34,6 +34,7 @@ export default function App() {
   const [editalFullText, setEditalFullText] = useState('');
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
   const [analyzingWithAi, setAnalyzingWithAi] = useState(false);
+  const [refreshBidsTrigger, setRefreshBidsTrigger] = useState(0);
 
   // PDF Loading indicator
   const [parsingPdf, setParsingPdf] = useState(false);
@@ -874,10 +875,12 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
               <PncpSearchTest
                 userId={session?.user?.id}
                 showToast={showToast}
+                onBidSaved={() => setRefreshBidsTrigger(prev => prev + 1)}
               />
               <ManagementDashboard
                 companies={companies}
                 showToast={showToast}
+                refreshTrigger={refreshBidsTrigger}
               />
             </div>
           )}

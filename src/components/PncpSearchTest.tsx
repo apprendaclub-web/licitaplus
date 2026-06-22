@@ -5,9 +5,10 @@ import { supabase } from '../lib/supabase';
 interface PncpSearchTestProps {
   userId?: string;
   showToast?: (msg: string, isError?: boolean) => void;
+  onBidSaved?: () => void;
 }
 
-export default function PncpSearchTest({ userId, showToast }: PncpSearchTestProps) {
+export default function PncpSearchTest({ userId, showToast, onBidSaved }: PncpSearchTestProps) {
   const [dataInicial, setDataInicial] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 15); // Default to last 15 days
@@ -155,6 +156,9 @@ export default function PncpSearchTest({ userId, showToast }: PncpSearchTestProp
       
       if (showToast) {
         showToast('Licitação salva com sucesso no Supabase!');
+      }
+      if (onBidSaved) {
+        onBidSaved();
       }
     } catch (err: any) {
       console.error(err);

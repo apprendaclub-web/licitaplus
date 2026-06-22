@@ -14,9 +14,10 @@ import {
 interface ManagementDashboardProps {
   companies: Company[];
   showToast: (msg: string, isError?: boolean) => void;
+  refreshTrigger?: number;
 }
 
-export default function ManagementDashboard({ companies, showToast }: ManagementDashboardProps) {
+export default function ManagementDashboard({ companies, showToast, refreshTrigger }: ManagementDashboardProps) {
   // Tab control inside Management Panel
   const [subTab, setSubTab] = useState<'monitoramento' | 'contratos' | 'orgaos' | 'portais'>('monitoramento');
 
@@ -53,7 +54,7 @@ export default function ManagementDashboard({ companies, showToast }: Management
   // Initial load
   useEffect(() => {
     loadAllData();
-  }, []);
+  }, [refreshTrigger]);
 
   const loadAllData = async () => {
     setLoading(true);
