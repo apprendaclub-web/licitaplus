@@ -896,13 +896,21 @@ export default function DeclarativeGenerator({
                   <label className="block text-xs uppercase text-[#8892a6] mb-1">
                     Cargo / Atribuição
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={currentCompany.rep_cargo || ''}
                     onChange={(e) => setCurrentCompany(prev => ({ ...prev, rep_cargo: e.target.value }))}
-                    placeholder="Sócio-Administrador"
-                    className="w-full bg-[#232a3d] border border-[#2d3548] rounded-lg px-3 py-2 text-sm text-[#e8ebf0] placeholder-[#8892a6]/30 focus:border-[#d4a574] focus:outline-none"
-                  />
+                    className="w-full bg-[#232a3d] border border-[#2d3548] rounded-lg px-3 py-2 text-sm text-[#e8ebf0] placeholder-[#8892a6]/30 focus:border-[#d4a574] focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="">Selecione o cargo...</option>
+                    <option value="Sócio Administrador">Sócio Administrador</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Diretor">Diretor</option>
+                    <option value="Diretor Financeiro">Diretor Financeiro</option>
+                    <option value="Procurador">Procurador</option>
+                    <option value="Contador">Contador</option>
+                    <option value="Empresário">Empresário</option>
+                    <option value="Microempreendedor Individual – MEI">Microempreendedor Individual – MEI</option>
+                  </select>
                 </div>
               </div>
 

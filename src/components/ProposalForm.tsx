@@ -873,12 +873,21 @@ export default function ProposalForm({
                   </div>
                   <div>
                     <label className="block text-[11px] uppercase text-[#8892a6]">Cargo</label>
-                    <input
-                      type="text"
+                    <select
                       value={propCompany.rep_cargo || ''}
                       onChange={(e) => setPropCompany(p => ({ ...p, rep_cargo: e.target.value }))}
-                      className="w-full bg-[#232a3d] border border-[#2d3548] rounded-lg px-3 py-1.5 text-xs text-[#e8ebf0] focus:outline-none"
-                    />
+                      className="w-full bg-[#232a3d] border border-[#2d3548] rounded-lg px-3 py-1.5 text-xs text-[#e8ebf0] focus:outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Sócio Administrador">Sócio Administrador</option>
+                      <option value="Administrador">Administrador</option>
+                      <option value="Diretor">Diretor</option>
+                      <option value="Diretor Financeiro">Diretor Financeiro</option>
+                      <option value="Procurador">Procurador</option>
+                      <option value="Contador">Contador</option>
+                      <option value="Empresário">Empresário</option>
+                      <option value="Microempreendedor Individual – MEI">Microempreendedor Individual – MEI</option>
+                    </select>
                   </div>
                 </div>
               </div>
