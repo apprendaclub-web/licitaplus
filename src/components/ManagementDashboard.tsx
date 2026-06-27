@@ -10,6 +10,7 @@ import {
   TrendingUp, Calendar, AlertTriangle, Users, Search, Plus, Trash2, Edit3, 
   MapPin, Clock, ExternalLink, Award, DollarSign, Archive, FileText, CheckCircle, ListPlus, X 
 } from 'lucide-react';
+import CountdownTimer from './CountdownTimer';
 
 interface ManagementDashboardProps {
   companies: Company[];
@@ -532,12 +533,13 @@ export default function ManagementDashboard({ companies, showToast, refreshTrigg
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {getUrgentBids().map(ub => (
-                  <div key={ub.id} className="p-3 bg-[#1a2030]/60 border border-[#2d3548] rounded-xl text-xs space-y-1">
+                  <div key={ub.id} className="p-3 bg-[#1a2030]/60 border border-[#2d3548] rounded-xl text-xs space-y-2">
                     <div className="font-bold text-[#e8ebf0]">{ub.empresa}</div>
                     <div className="text-[#8892a6]">{ub.orgao_nome} • Proc: {ub.processo}</div>
-                    <div className="text-[#d4a574] font-semibold flex items-center gap-1">
+                    <CountdownTimer dataSessao={ub.reabertura} />
+                    <div className="text-[#8892a6]/70 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      <span>Sessão em {formatDateTime(ub.reabertura)}</span>
+                      <span>{formatDateTime(ub.reabertura)}</span>
                     </div>
                   </div>
                 ))}
@@ -684,9 +686,12 @@ export default function ManagementDashboard({ companies, showToast, refreshTrigg
                             </span>
                           </td>
                           <td className="p-3 text-center">
-                            <span className={isUrgent ? 'text-[#d97757] font-bold' : ''}>
-                              {b.reabertura ? formatDateTime(b.reabertura) : '—'}
-                            </span>
+                            <div className="flex flex-col items-center gap-1.5">
+                              <CountdownTimer dataSessao={b.reabertura} />
+                              <span className={isUrgent ? 'text-[#d97757] font-bold text-xs' : 'text-xs'}>
+                                {b.reabertura ? formatDateTime(b.reabertura) : '—'}
+                              </span>
+                            </div>
                           </td>
                           <td className="p-3 text-right text-emerald-400 font-semibold">{formatCurrency(b.valor_est)}</td>
                           <td className="p-3 text-center">
