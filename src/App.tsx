@@ -7,7 +7,7 @@ import DeclarativeGenerator from './components/DeclarativeGenerator';
 import ProposalForm from './components/ProposalForm';
 import ManagementDashboard from './components/ManagementDashboard';
 import CompanyManager from './components/CompanyManager';
-import PncpSearchTest from './components/PncpSearchTest';
+import BuscaOportunidades from './pages/BuscaOportunidades';
 import { 
   FileCheck, Shield, LogOut, CheckCircle, UploadCloud, Download, 
   Trash2, AlertCircle, RefreshCw, FileText, Settings, Sparkles
@@ -17,7 +17,7 @@ export default function App() {
   const [session, setSession] = useState<any>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [sandboxMode, setSandboxMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<'declaracoes' | 'propostas' | 'gestao' | 'empresas'>('empresas');
+  const [activeTab, setActiveTab] = useState<'declaracoes' | 'propostas' | 'gestao' | 'empresas' | 'busca'>('empresas');
 
   // Database lists
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -498,6 +498,16 @@ export default function App() {
           >
             Propostas
           </button>
+          <button
+            onClick={() => setActiveTab('busca')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === 'busca'
+                ? 'bg-[#d4a574] text-[#0f1419] font-bold shadow-md'
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            Busca de Certames
+          </button>
         </nav>
 
         {/* Session bar */}
@@ -871,18 +881,19 @@ CREATE TABLE public.licitaplus_portais ( ... );`}</pre>
           )}
 
           {activeTab === 'gestao' && (
-            <div className="space-y-6">
-              <PncpSearchTest
-                userId={session?.user?.id}
-                showToast={showToast}
-                onBidSaved={() => setRefreshBidsTrigger(prev => prev + 1)}
-              />
-              <ManagementDashboard
-                companies={companies}
-                showToast={showToast}
-                refreshTrigger={refreshBidsTrigger}
-              />
-            </div>
+            <ManagementDashboard
+              companies={companies}
+              showToast={showToast}
+              refreshTrigger={refreshBidsTrigger}
+            />
+          )}
+
+          {activeTab === 'busca' && (
+            <BuscaOportunidades
+              userId={session?.user?.id}
+              showToast={showToast}
+              onBidSaved={() => setRefreshBidsTrigger(prev => prev + 1)}
+            />
           )}
         </div>
       </main>
