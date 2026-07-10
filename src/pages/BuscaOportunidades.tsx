@@ -43,6 +43,7 @@ export default function BuscaOportunidades({ userId, showToast, onBidSaved }: Bu
   const [uf, setUf] = useState('');
   const [modalidade, setModalidade] = useState('5');
   const [tamanhoPagina, setTamanhoPagina] = useState('20');
+  const [palavraChave, setPalavraChave] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [totalResultados, setTotalResultados] = useState<number | null>(null);
@@ -69,6 +70,10 @@ export default function BuscaOportunidades({ userId, showToast, onBidSaved }: Bu
 
     if (uf && uf.trim()) {
       params.append('uf', uf.trim().toUpperCase());
+    }
+
+    if (palavraChave && palavraChave.trim()) {
+      params.append('objeto', palavraChave.trim());
     }
 
     try {
@@ -234,8 +239,33 @@ export default function BuscaOportunidades({ userId, showToast, onBidSaved }: Bu
           <span className="text-sm font-semibold text-[#e8ebf0]">Filtros de Pesquisa</span>
         </div>
 
-        <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          {/* Data Inicial */}
+        <form onSubmit={handleSearch} className="space-y-4">
+          {/* Palavras-Chave (Full-width) */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] text-[#8892a6] uppercase font-mono tracking-wider block">Palavras-Chave</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8892a6]" />
+              <input
+                type="text"
+                placeholder="Ex: limpeza, tecnologia, material de escritório..."
+                value={palavraChave}
+                onChange={(e) => setPalavraChave(e.target.value)}
+                className="w-full bg-[#232a3d] border border-[#2d3548] rounded-lg pl-9 pr-14 py-2 text-xs text-[#e8ebf0] focus:outline-none focus:border-[#d4a574] transition-all"
+              />
+              {palavraChave && (
+                <button
+                  type="button"
+                  onClick={() => setPalavraChave('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[#8892a6] hover:text-[#e8ebf0] transition-colors"
+                >
+                  LIMPAR
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            {/* Data Inicial */}
           <div className="space-y-1.5">
             <label className="text-[10px] text-[#8892a6] uppercase font-mono tracking-wider block">Data Inicial</label>
             <div className="relative">
@@ -331,6 +361,7 @@ export default function BuscaOportunidades({ userId, showToast, onBidSaved }: Bu
                 </>
               )}
             </button>
+          </div>
           </div>
         </form>
       </div>
